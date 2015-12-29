@@ -76,6 +76,7 @@ class CalculatorViewController: UIViewController {
         case "sin": performOperation{ sin($0) };
         case "cos": performOperation{ cos($0) };
         case "π": displayValue = pi; enter();
+        case "±": performOperation { -$0 };
         default: break;
         }
     }
@@ -100,7 +101,11 @@ class CalculatorViewController: UIViewController {
     @IBAction func enter() {
         self.userIsInTheMiddleOfTyping = false;
         self.userHasUsedDecimal = false;
-        operandStack.append(displayValue);
+        if let value = displayValue {
+            operandStack.append(value);
+        } else {
+            displayValue = 0;
+        }
         print("operandStack:"+"\(operandStack)");
     }
 
@@ -129,14 +134,21 @@ class CalculatorViewController: UIViewController {
         addToHistory("🔙");
     }
     var operandStack = Array<Double>();
-    var displayValue:Double {
+    var displayValue:Double? {
         get{
             // return a double value format from string
-            return NSNumberFormatter().numberFromString(displayLable.text!)!.doubleValue;
+            if let displayText = displayLable.text {
+                if let displayNumber = NSNumberFormatter().numberFromString(displayText) {
+                    return displayNumber.doubleValue;
+                }
+            }
+            return nil;
         }
         set{
             // set the double value to the text
-            displayLable.text = "\(newValue)";
+            if let value = newValue {
+                displayLable.text = "\(value)";
+            }
             userIsInTheMiddleOfTyping = false;
         }
     }
